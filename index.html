@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EXAMYATRI - Quiz Se Kro Success Yatra</title>
+  
+  <!-- Babel for live TSX/JSX transformation -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <!-- Cropper.js CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" />
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-1HGZL93811"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-1HGZL93811');
+  </script>
+  <!-- MathJax for Math/Physics Formula Rendering -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+        processEscapes: true,
+        processEnvironments: true
+      },
+      options: {
+        ignoreHtmlClass: 'tex2jax_ignore',
+        processHtmlClass: 'tex2jax_process'
+      },
+      svg: {
+        fontCache: 'global'
+      }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+  <link rel="stylesheet" href="index.css">
+<link rel="stylesheet" href="/index.css">
+</head>
+<body class="dark-mode">
+
+<!-- NEW: Global Navigation Bar -->
+<div id="global-nav-bar" class="global-nav">
+    <button id="global-home-btn" class="btn btn-secondary">🏠 Home</button>
+    <a href="https://m.youtube.com/@ExamYatri_mock_test/videos" target="_blank" id="global-how-to-use-btn" class="btn fire-animation">🔥 How to Use 🔥</a>
+</div>
+
+<div id="loading-overlay" class="hidden">
+    <div class="spinner"></div>
+    <p id="loading-text"></p>
+</div>
+
+<div id="paste-notification"></div>
+<div id="congrats-animation-container"></div>
+<div id="sad-reaction-overlay" class="hidden"><span id="sad-reaction-emoji"></span></div>
+
+<!-- ======================================= -->
+<!-- ===== UNIFIED CONTAINER (MAIN) ==== -->
+<!-- ======================================= -->
+<div class="container" id="main-container">
+    <div class="header">
+        <span class="header-branding">✍️ <strong>EXAMYATRI</strong> - <span class="tagline">One Plateform. All Exam</span></span>
+        <button id="theme-toggle-btn" title="Toggle Dark/Light Mode">🌙</button>
+    </div>
+
+    <!-- ===== NEW: MODE SELECTION (SINGLE/MULTI) ===== -->
+    <div id="mode-selection-container">
+        <h2>❤️Generate Topicwise, Chapterwise, Subjectwise Mock Test/ Quiz❤️</h2>
+        <p>Completely FREE</p>
+        <div class="mode-options">
+            <div class="mode-option-card" id="select-single-player-btn">
+                <span class="card-icon">👤</span>
+                <h3>Create Question and Start Practice</h3>
+                <p>Create a set of questions on any topic and practice by yourself.</p>
+            </div>
+            <div class="mode-option-card" id="select-multiplayer-btn">
+                <span class="card-icon">👥</span>
+                <h3>Create Question and Start Practice With Friends</h3>
+                <p>Create a room or join a friend's to practice together.</p>
+            </div>
+        </div>
+        <!-- MODIFIED: Search Button -->
+        <div class="mode-option-card" id="search-practice-btn" style="margin-top: 1.5rem;">
+            <span class="card-icon">🔎</span>
+            <h3>Search Any Topic of Your Exam and Start Practice</h3>
+            <p>Find a previously saved quiz by topic or ID and practice again.</p>
+        </div>
+        
+        <!-- MODIFIED: "Coaching PDF to Quiz" Button to Section -->
+        <a href="Testpdf.html" id="coaching-pdf-to-quiz-btn" class="mode-option-card" style="margin-top: 1.5rem; padding: 1.5rem; text-decoration: none; color: inherit; display: block;">
+            <span class="card-icon" style="font-size: 2.5rem;">🧠</span>
+            <h3 style="font-size: 1.1em;">Coaching Test series Pdf/ PYQs Book Pdf to Quiz</h3>
+            <p style="font-size: 0.85em;">Convert your existing PDF materials into interactive quizzes.</p>
+        </a>
+
+        <!-- NEW: BLOGGER POSTS SECTION -->
+        <div id="blog-section">
+          <h2 style="text-align:center; margin-bottom: 1.5rem;">Latest from Our Blog</h2>
+          <p style="text-align:center;">Loading latest posts...</p>
+        </div>
+    </div>
+    
+    <!-- ===== NEW: SEARCH SAVED QUIZ CONTAINER ===== -->
+    <div id="search-container" class="hidden">
+        <h3>🔎 Search Saved Quizzes</h3>
+        <div class="input-group" style="margin-top: 2rem;">
+            <label for="search-input" class="input-label">Topic or Backup ID</label>
+            <input type="text" id="search-input" class="input-field" placeholder="Enter topic name or the ID you saved...">
+        </div>
+        <button id="perform-search-btn" class="btn btn-full-width">Search</button>
+        <div id="search-results-container" style="margin-top: 2rem; max-height: 40vh; overflow-y: auto;">
+            <!-- Results will be injected here -->
+        </div>
+        <button class="btn btn-secondary back-to-mode-selection-btn" style="margin-top: 1rem; width: 100%;">← Back</button>
+    </div>
+
+    <!-- ===== MULTIPLAYER SELECTION SCREEN (JOIN OR CREATE) ===== -->
+    <div id="multiplayer-selection-container" class="hidden">
+        <h2>Multiplayer Mode</h2>
+        <p>Join a friend's room or create a new one to host a game.</p>
+        <div class="multiplayer-options">
+            <div class="multiplayer-option-card" id="join-room-btn">
+                <span class="card-icon">🤝</span>
+                <h3>Join Room</h3>
+                <p>Enter a code to join an assessment hosted by a friend.</p>
+            </div>
+            <div class="multiplayer-option-card" id="create-room-btn">
+                <span class="card-icon">👑</span>
+                <h3>Create Room</h3>
+                <p>Generate questions and invite your friends to play.</p>
+            </div>
+        </div>
+        <button class="btn btn-secondary back-to-mode-selection-btn" style="margin-top: 2rem;">← Back</button>
+    </div>
+
+    <!-- ===== JOIN ROOM SCREEN ===== -->
+    <div id="join-room-container" class="hidden">
+        <h3>Join a Room</h3>
+        <div class="input-group">
+            <label for="player-name-join" class="input-label">Your Name</label>
+            <input type="text" id="player-name-join" class="input-field" placeholder="Enter your name">
+        </div>
+        <div class="input-group">
+            <label for="room-code-input" class="input-label">Room Code</label>
+            <input type="text" id="room-code-input" class="input-field" placeholder="Enter the 6-digit code" maxlength="6" inputmode="numeric" pattern="[0-9]*">
+        </div>
+        <button id="submit-join-room-btn" class="btn btn-full-width btn-success">Join Room</button>
+         <button class="btn btn-secondary back-to-multiplayer-selection-btn" style="margin-top: 1rem;">← Back</button>
+    </div>
+
+    <!-- ===== QUIZ GENERATOR (SINGLE PLAYER OR MULTIPLAYER CREATE) ===== -->
+    <div id="manual-generator-container" class="hidden">
+        <div id="creation-method-selector">
+             <p id="generator-title" style="font-size: 1.1em; text-align: center; grid-column: 1 / -1;">❤️ Create your questions below ❤️</p>
+             <div class="creation-option-card" id="select-from-topic">
+                <span class="card-icon">📝</span><h4>Generate from Topic</h4><p>Provide a topic or formula to generate question.</p>
+            </div>
+            <div class="creation-option-card" id="select-from-text">
+                <span class="card-icon">📋</span><h4>Customise Your Mock Test</h4><p>Add different topics from different subject and create a mock test similar to your exam.</p>
+            </div>
+            <div class="creation-option-card" id="select-from-image">
+                <span class="card-icon">🖼️</span><h4>Generate from Image</h4><p>Use images of notes / PYQs and generate similar question.</p>
+            </div>
+            <div class="creation-option-card" id="select-from-pdf">
+                <span class="card-icon">📄</span><h4>Generate from PDF</h4><p>Upload a PDF to create questions from each line .</p>
+            </div>
+             <button class="btn btn-secondary back-to-mode-selection-btn" style="grid-column: 1 / -1; margin-top: 1rem;">← Back to Main Menu</button>
+        </div>
+
+        <!-- WORKFLOW 1: From Topic -->
+        <div id="topic-generator-workflow" class="hidden">
+            <div class="step-header-container">
+              <h3 class="step-header">Step 1: Define Your Questions</h3>
+            </div>
+            <div class="input-group"><label for="prompt-topic" class="input-label">Add Primary Topic Name or Formula of Physics or Mathematics or other subject</label><input type="text" id="prompt-topic" class="input-field" placeholder="e.g., The Solar System, World War II"></div>
+            <div class="input-group"><label for="prompt-num-questions-topic" class="input-label">Number of Questions</label><input type="number" id="prompt-num-questions-topic" class="input-field" placeholder="e.g., 10" min="1" max="50"></div>
+            <div class="input-group"><label for="prompt-subject-topic" class="input-label">Subject/ instruction e.g. generate question on this topic(Optional)</label><input type="text" id="prompt-subject-topic" class="input-field" placeholder="e.g., Science, maths"></div>
+            <div class="input-group"><label for="prompt-language-topic" class="input-label">Language</label><select id="prompt-language-topic" class="input-field"><option value="English" selected>English</option><option value="Hindi">Hindi</option><option value="Spanish">Spanish</option><option value="French">French</option><option value="German">German</option></select></div>
+            <div class="input-group"><label for="prompt-difficulty-topic" class="input-label">Difficulty Level</label><select id="prompt-difficulty-topic" class="input-field"><option value="Easy">Easy</option><option value="Medium" selected>Medium</option><option value="Hard">Hard</option><option value="Expert">Expert</option></select></div>
+            <div class="input-group"><label class="input-label">Target Exam (Required)</label><div class="exam-buttons-container"></div><input type="text" class="prompt-exam-other input-field hidden" placeholder="Enter Other exam name" style="margin-top: 10px;"></div>
+            <div class="input-group"><label for="question-format-select-topic" class="input-label">Question Format</label><select id="question-format-select-topic" class="input-field"></select></div>
+            <button id="generate-prompt-btn-topic" class="btn btn-full-width glowing">Start 🚀</button>
+            <button class="btn btn-secondary back-to-creation-selection-btn" style="margin-top: 1rem; width: 100%;">&larr; Back to Options</button>
+        </div>
+        
+        <!-- WORKFLOW 2: From Text (MODIFIED) -->
+        <div id="text-generator-workflow" class="hidden">
+            <div class="step-header-container">
+              <h3 class="step-header">Step 1: Build Your Mock Test Sections</h3>
+            </div>
+            
+            <!-- NEW DYNAMIC BUILDER UI -->
+            <div class="input-group">
+                <label class="input-label">Add sections for your mock test. Click a filled box to edit.</label>
+                <div id="dynamic-prompt-builder">
+                    <!-- Rows will be injected here by JavaScript -->
+                </div>
+                <div class="prompt-builder-add-btn-container">
+                    <button id="prompt-builder-add-btn" class="btn">➕ Add Section</button>
+                </div>
+            </div>
+
+            <div class="step-header-container">
+              <h3 class="step-header">Step 2: Define Global Settings</h3>
+            </div>
+            
+            <div class="input-group"><label for="prompt-language-text" class="input-label">Language</label><select id="prompt-language-text" class="input-field"><option value="English" selected>English</option><option value="Hindi">Hindi</option><option value="Spanish">Spanish</option><option value="French">French</option><option value="German">German</option></select></div>
+            <div class="input-group"><label for="prompt-difficulty-text" class="input-label">Difficulty Level</label><select id="prompt-difficulty-text" class="input-field"><option value="Easy">Easy</option><option value="Medium" selected>Medium</option><option value="Hard">Hard</option><option value="Expert">Expert</option></select></div>
+            <div class="input-group"><label class="input-label">Target Exam (Required)</label><div class="exam-buttons-container"></div><input type="text" class="prompt-exam-other input-field hidden" placeholder="Enter other exam name" style="margin-top: 10px;"></div>
+            <div class="input-group"><label for="question-format-select-text" class="input-label">Question Format</label><select id="question-format-select-text" class="input-field"></select></div>
+            <button id="generate-prompt-btn-text" class="btn btn-full-width glowing">Start 🚀</button>
+             <button class="btn btn-secondary back-to-creation-selection-btn" style="margin-top: 1rem; width: 100%;">&larr; Back to Options</button>
+        </div>
+
+        <!-- WORKFLOW 3: From Image -->
+        <div id="image-generator-workflow" class="hidden">
+            <div id="image-format-guide" class="hidden">
+                 <div class="guide-card good">
+                    <h5>✅ Good Example</h5>
+                    <svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg"><rect x="5" y="5" width="90" height="110" rx="5" fill="var(--component-bg)" stroke="var(--correct-color)" stroke-width="3"/><path d="M20 25 h60 M20 40 h60 M20 55 h60 M20 70 h40 M20 85 h60" stroke="var(--text-color)" stroke-width="2" /></svg>
+                    <p>Image is <strong>upright</strong> (portrait) and the text is <strong>clear</strong>.</p>
+                </div>
+                <div class="guide-card bad">
+                    <h5>❌ Bad Example</h5>
+                    <svg viewBox="0 0 120 100" xmlns="http://www.w3.org/2000/svg"><rect x="5" y="5" width="110" height="90" rx="5" fill="var(--component-bg)" stroke="var(--incorrect-color)" stroke-width="3"/><path d="M25 20 v60 M40 20 v60 M55 20 v60 M70 20 v40 M85 20 v60" stroke="var(--text-color)" stroke-width="2" stroke-dasharray="3 3"/></svg>
+                    <p>Image is <strong>sideways</strong> (landscape) or the text is <strong>blurry</strong>.</p>
+                </div>
+            </div>
+            <div class="step-header-container">
+              <h3 class="step-header">Step 1: Choose Document Language</h3>
+            </div>
+             <div class="input-group">
+                <div class="lang-selector-pills" id="image-lang-selector-container">
+                    <button class="lang-pill-btn" data-lang="eng">English</button>
+                    <button class="lang-pill-btn" data-lang="hin">Hindi</button>
+                    <button class="lang-pill-btn" data-lang="eng+hin">Mix (Eng+Hin)</button>
+                </div>
+            </div>
+
+            <h3 class="step-header">Step 2: Add Your Images</h3>
+            <p>Select your images. The system will automatically extract the text.</p>
+            
+            <div id="image-input-area"><button id="select-images-btn" class="btn btn-secondary glowing">📂 Select Images</button></div>
+
+            <div class="handwriting-toggle-group">
+                <label for="handwriting-toggle">
+                    <input type="checkbox" id="handwriting-toggle" checked> This image contains handwriting
+                </label>
+            </div>
+            <div id="image-preview-container"></div>
+            <div id="ocr-status"></div>
+            <div id="image-quiz-definition-area" class="hidden fade-in-slide-up">
+                <div class="step-header-container">
+                  <h3 class="step-header">Step 3: Define Your Questions</h3>
+                </div>
+                <textarea id="source-text-image" style="display: none;"></textarea>
+                <div class="input-group"><label for="prompt-num-questions-image" class="input-label">Number of Questions</label><input type="number" id="prompt-num-questions-image" class="input-field" placeholder="e.g., 5" min="1" max="50"></div>
+                <div class="input-group"><label for="prompt-topic-image" class="input-label">Topic/Instruction e.g generate similar question</label><input type="text" id="prompt-topic-image" class="input-field" placeholder="e.g., Photosynthesis, Generate question on this topic"></div>
+                <div class="input-group"><label for="prompt-subject-image" class="input-label">Subject Area (Optional)</label><input type="text" id="prompt-subject-image" class="input-field" placeholder="e.g., Biology from textbook page"></div>
+                <div class="input-group"><label for="prompt-language-image" class="input-label">Language</label><select id="prompt-language-image" class="input-field"><option value="English" selected>English</option><option value="Hindi">Hindi</option><option value="Spanish">Spanish</option><option value="French">French</option><option value="German">German</option></select></div>
+                <div class="input-group"><label for="prompt-difficulty-image" class="input-label">Difficulty Level</label><select id="prompt-difficulty-image" class="input-field"><option value="Easy">Easy</option><option value="Medium" selected>Medium</option><option value="Hard">Hard</option><option value="Expert">Expert</option></select></div>
+                <div class="input-group"><label class="input-label">Target Exam (Required)</label><div class="exam-buttons-container"></div><input type="text" class="prompt-exam-other input-field hidden" placeholder="Enter other exam name" style="margin-top: 10px;"></div>
+                <div class="input-group"><label for="question-format-select-image" class="input-label">Question Format</label><select id="question-format-select-image" class="input-field"></select></div>
+                <button id="generate-prompt-btn-image" class="btn btn-full-width glowing">Start 🚀</button>
+            </div>
+            <button class="btn btn-secondary back-to-creation-selection-btn" style="margin-top: 1rem; width: 100%;">&larr; Back to Options</button>
+        </div>
+        <!-- WORKFLOW 4: From PDF -->
+        <div id="pdf-generator-workflow" class="hidden">
+            <div class="step-header-container">
+              <h3 class="step-header">Step 1: Choose Document Language</h3>
+            </div>
+             <div class="input-group">
+                <div class="lang-selector-pills" id="pdf-lang-selector-container">
+                    <button class="lang-pill-btn" data-lang="eng">English</button>
+                    <button class="lang-pill-btn" data-lang="hin">Hindi</button>
+                    <button class="lang-pill-btn" data-lang="eng+hin">Mix (Eng+Hin)</button>
+                </div>
+            </div>
+
+            <h3 class="step-header">Step 2: Upload & Extract</h3>
+            
+            <div id="pdf-input-area">
+                <button id="select-pdf-btn" class="btn btn-secondary glowing">📂 Select PDF</button>
+                <input type="file" id="pdf-file-input" accept=".pdf" class="hidden" style="display:none !important;">
+                <span id="pdf-file-name" style="align-self: center; margin-left: 15px; font-style: italic;"></span>
+            </div>
+            <div id="pdf-options-container" class="hidden fade-in-slide-up">
+                <div class="input-group">
+                    <label class="input-label">Extraction Options</label>
+                    <label><input type="radio" name="pdf-page-option" id="pdf-page-option-all" value="all"> Extract All Pages</label><br>
+                    <label><input type="radio" name="pdf-page-option" id="pdf-page-option-range" value="range" checked> Extract Page Range</label>
+                    <div id="pdf-page-range-selector" class="hidden" style="margin-top: 10px;">
+                        <div class="page-range-container">
+                            <label for="pdf-page-from">From:</label>
+                            <input type="number" id="pdf-page-from" class="input-field" min="1">
+                            <label for="pdf-page-to">To:</label>
+                            <input type="number" id="pdf-page-to" class="input-field" min="1">
+                        </div>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label><input type="checkbox" id="pdf-force-ocr"> Force OCR (for scanned or image-based PDFs)</label>
+                </div>
+
+                <button id="extract-text-pdf-btn" class="btn btn-full-width glowing">🔍 Extract Text from PDF</button>
+                <div id="pdf-status"></div>
+            </div>
+             <div id="pdf-quiz-definition-area" class="hidden fade-in-slide-up">
+                <div class="step-header-container">
+                  <h3 class="step-header">Step 3: Define Your Questions</h3>
+                </div>
+                <textarea id="source-text-pdf" style="display: none;"></textarea>
+                <div class="input-group"><label for="prompt-num-questions-pdf" class="input-label">Number of Questions</label><input type="number" id="prompt-num-questions-pdf" class="input-field" placeholder="e.g., 10" min="1" max="50"></div>
+                <div class="input-group"><label for="prompt-topic-pdf" class="input-label">Primary Topic (Optional)</label><input type="text" id="prompt-topic-pdf" class="input-field" placeholder="e.g., History of Ancient Rome"></div>
+                <div class="input-group"><label for="prompt-subject-pdf" class="input-label">Subject Area (Optional)</label><input type="text" id="prompt-subject-pdf" class="input-field" placeholder="e.g., History, Science"></div>
+                <div class="input-group"><label for="prompt-language-pdf" class="input-label">Language</label><select id="prompt-language-pdf" class="input-field"><option value="English" selected>English</option><option value="Hindi">Hindi</option><option value="Spanish">Spanish</option><option value="French">French</option><option value="German">German</option></select></div>
+                <div class="input-group"><label for="prompt-difficulty-pdf" class="input-label">Difficulty Level</label><select id="prompt-difficulty-pdf" class="input-field"><option value="Easy">Easy</option><option value="Medium" selected>Medium</option><option value="Hard">Hard</option><option value="Expert">Expert</option></select></div>
+                <div class="input-group"><label class="input-label">Target Exam (Required)</label><div class="exam-buttons-container"></div><input type="text" class="prompt-exam-other input-field hidden" placeholder="Enter other exam name" style="margin-top: 10px;"></div>
+                <div class="input-group"><label for="question-format-select-pdf" class="input-label">Question Format</label><select id="question-format-select-pdf" class="input-field"></select></div>
+                <button id="generate-prompt-btn-pdf" class="btn btn-full-width glowing">Start 🚀</button>
+            </div>
+             <button class="btn btn-secondary back-to-creation-selection-btn" style="margin-top: 1rem; width: 100%;">&larr; Back to Options</button>
+        </div>
+    </div>
+
+    <!-- ===== PASTE CONTAINER (UNIFIED FOR SINGLE/MULTI) ====== -->
+    <div id="paste-quiz-container" class="hidden">
+        <p style="text-align: center; font-size: 1.1em;"><b>Welcome back!</b> Waiting for the questions from the AI.</p>
+        <div id="ai-link-fallback" class="hidden">
+            <p>⚠️ It looks like the AI tab was blocked by your browser.</p>
+            <a href="https://gemini.google.com" target="_blank" class="btn">Click Here to Open Gemini Manually</a>
+        </div>
+        <div class="input-group">
+            <div class="prompt-actions-row" style="margin-bottom: 1rem;">
+                <button id="paste-from-clipboard-btn" class="btn btn-secondary">📋 Paste from Clipboard</button>
+            </div>
+            <p style="text-align:center; font-size: 0.9em; margin-top: 0;">...or paste manually into the box below.</p>
+            <textarea id="quiz-data-input" placeholder="I'll try to paste and start automatically when you return to this tab. If that doesn't work, use the button above or paste manually here."></textarea>
+        </div>
+        <button id="start-manual-quiz-btn" class="btn btn-full-width">Parse & Start! 🧠</button>
+    </div>
+
+    <!-- ===== MULTIPLAYER STEP 3: CONFIGURE ROOM ===== -->
+    <div id="configure-room-container" class="hidden">
+        <h3>Configure Your Room</h3>
+        <div class="input-group">
+            <label for="host-name" class="input-label">Your Name (as Host)</label>
+            <input type="text" id="host-name" class="input-field" placeholder="Enter your name">
+        </div>
+        <div class="input-group">
+            <label for="quiz-time-select" class="input-label">Total Time</label>
+            <select id="quiz-time-select" class="input-field">
+                <option value="300">5 Minutes</option>
+                <option value="600" selected>10 Minutes</option>
+                <option value="900">15 Minutes</option>
+                <option value="1200">20 Minutes</option>
+                <option value="1800">30 Minutes</option>
+                <option value="2700">45 Minutes</option>
+                <option value="3600">1 Hour</option>
+            </select>
+        </div>
+        <button id="generate-code-btn" class="btn btn-full-width btn-success">Create Joining Code</button>
+    </div>
+
+    <!-- ===== LOBBY (for both host and players) ===== -->
+    <div id="lobby-container" class="hidden">
+        <h2 id="lobby-title">Waiting for Players...</h2>
+        <div id="room-code-display" class="hidden">
+            <p>Share this code with your friends:</p>
+            <strong id="room-code-text"></strong>
+            <button id="share-code-whatsapp-btn" class="btn" style="margin-top: 1rem; background-color: #25D366;">Share on WhatsApp</button>
+        </div>
+        <h3>Players in Room (<span id="player-count">1</span>/4)</h3>
+        <ul id="lobby-players-list">
+            <!-- Player names will be injected here by JS -->
+        </ul>
+        <button id="start-game-btn" class="btn btn-full-width btn-success hidden">Start for Everyone</button>
+        <p id="waiting-for-host-text">Waiting for the host to start the game.</p>
+    </div>
+
+    <!-- ===== SINGLE PLAYER QUIZ PLAYER ===== -->
+    <div id="quiz-player-container" class="hidden">
+        <div id="quiz-header">
+            <span id="question-topic"></span>
+            <span id="timer">
+                <span class="timer-face" id="face-happy">😊</span><span class="timer-face" id="face-worried">😟</span>
+                <span class="timer-face" id="face-sad">😥</span><span class="timer-face" id="face-crying">😭</span>
+                <span id="timer-text">00:00</span>
+            </span>
+            <span id="progress"></span>
+            <div id="pressure-mode-container">
+                <button id="pressure-mode-toggle-btn" title="Mental Pressure Settings">⏰</button>
+                <span id="pressure-text-animation" class="hidden"></span>
+                <div id="pressure-mode-controls" class="hidden">
+                    <label><span class="switch"><input type="checkbox" id="shake-reminder-toggle"><span class="slider"></span></span> Shake Button Reminder</label>
+                </div>
+            </div>
+        </div>
+        <div id="question-image-container" class="hidden"></div>
+        <div id="question-and-bookmark">
+            <div id="question-text-container"><p id="question-text"></p><div id="statements-list"></div></div>
+            <button id="bookmark-btn" title="Bookmark Question">⭐</button>
+        </div>
+        <div id="options-container"></div>
+        <div id="explanation-container" class="hidden"><h4>Explanation</h4><p id="explanation-text"></p></div>
+        <div id="quiz-actions"></div>
+    </div>
+
+    <!-- ===== MULTIPLAYER QUIZ PLAYER ===== -->
+    <div id="multiplayer-quiz-player-container" class="hidden">
+         <div id="mp-quiz-header">
+            <span id="mp-progress" class="progress"></span>
+             <span id="mp-face-reaction-container">
+                 <span class="timer-face" id="mp-face-happy">😊</span>
+                 <span class="timer-face" id="mp-face-angry">😠</span>
+            </span>
+            <span id="mp-timer" class="timer">Time Left: <strong>10:00</strong></span>
+        </div>
+        <hr>
+        <p id="mp-question-text" class="question-text"></p>
+        <div id="mp-options-container"></div>
+        <div id="mp-explanation-container" class="explanation-container hidden"></div>
+        <div id="mp-quiz-actions"></div>
+        <div id="waiting-for-submission-overlay" class="hidden">
+            <div class="spinner"></div>
+            <p>Your answers have been submitted.<br>Waiting for other players to finish...</p>
+        </div>
+    </div>
+
+    <!-- ===== SINGLE PLAYER RESULTS ===== -->
+    <div id="results-screen" class="hidden">
+        <div class="header"><h2>🏆 Assessment Results</h2></div>
+        <!-- MODIFIED: SAVE STATUS CONTAINER -->
+        <div id="save-status-container" style="text-align: center; margin-bottom: 1.5rem; padding: 1rem; border-radius: 8px; background-color: var(--component-bg); font-size: 0.95em;"></div>
+        <div id="score-summary"></div>
+        <div id="results-summary-wrapper">
+            <div id="score-performance-chart-container"></div>
+            <div id="quiz-summary-details"></div>
+        </div>
+        <div class="share-buttons">
+            <div class="share-buttons-row">
+                <button id="start-new-practice-btn" class="btn flash-green">🚀 Start New Practice</button>
+                <button id="share-pdf-btn" class="btn">📄 Download PDF</button>
+                <button id="copy-bookmarks-btn" class="btn" style="background-color: var(--bookmarked-active-color);">⭐ Copy Bookmarked</button>
+                <button id="copy-all-btn" class="btn">📋 Copy All</button>
+                <button id="share-whatsapp-btn" class="btn" style="background-color: #25D366;">💬 Share on WhatsApp</button>
+                <button id="share-site-btn" class="btn" style="background-color: #5865f2;">📢 Share Website</button>
+                <button id="restart-quiz-btn" class="btn">🔄 Take Another Assessment</button>
+            </div>
+            <div id="results-page-telegram-opener">
+                <div class="telegram-input-group">
+                    <input type="text" id="results-page-telegram-input" class="input-field" placeholder="Enter Telegram channel username...">
+                    <button id="results-page-open-telegram-btn" class="btn btn-secondary">Open</button>
+                </div>
+            </div>
+            <div id="telegram-backup-guide-container">
+                <button id="telegram-backup-guide-btn" title="How to backup on Telegram">🤔</button>
+                <p>how to backup this bookmark question on telegram for future revision</p>
+            </div>
+        </div>
+        <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 2rem 0;">
+        <h3 >Review Your Answers:</h3>
+        <div id="results-review"></div>
+        <div class="hard-reset-container">
+            <button id="hard-reset-btn-single" class="btn hard-reset-btn fire-animation">🔥 Go to Home & Delete All Data 🔥</button>
+        </div>
+    </div>
+
+     <!-- ===== MULTIPLAYER RESULTS (MODIFIED) ===== -->
+    <div id="multiplayer-results-container" class="hidden">
+        <h2 id="mp-results-title">🏆 Assessment Submitted! 🏆</h2>
+        <div id="multiplayer-personal-summary">
+            <h3>Your Performance</h3>
+            <div class="summary-grid">
+                 <!-- Personal stats will be injected here -->
+            </div>
+        </div>
+
+        <div id="leaderboard-section" class="hidden">
+            <h3>Final Leaderboard</h3>
+            <ul id="leaderboard">
+                <!-- Final scores will be injected here -->
+            </ul>
+        </div>
+
+        <p id="waiting-for-leaderboard-text" class="hidden" style="margin-top: 1.5rem; text-align: center; font-style: italic;">Waiting for other players to finish to see the final leaderboard...</p>
+        <p id="room-deletion-countdown" class="hidden" style="margin-top: 2rem; font-weight: bold; text-align: center; color: var(--incorrect-color);"></p>
+        
+        <div class="hard-reset-container">
+            <button id="hard-reset-btn-multi" class="btn hard-reset-btn fire-animation">🔥 Go to Home & Delete All Data 🔥</button>
+        </div>
+    </div>
+</div>
+
+<!-- All modals from file 67 -->
+<div id="manual-copy-modal-overlay" class="modal-overlay hidden"><div id="manual-copy-modal-content" class="modal-content"><h3>Automatic Copy Failed</h3><p>Please manually copy the text below (it's already selected for you):</p><textarea id="manual-copy-textarea" readonly></textarea><button id="manual-copy-close-btn" class="btn">Close</button></div></div>
+<div id="crop-modal-overlay" class="modal-overlay hidden"><div id="crop-modal-content" class="modal-content"><h3>Crop Image</h3><div id="crop-image-container"><img id="image-to-crop" src="" alt="Image for cropping"></div><div class="modal-actions"><button id="cancel-crop-btn" class="btn btn-secondary">Cancel</button><button id="save-crop-btn" class="btn">Crop & Save</button></div></div></div>
+<div id="telegram-backup-modal-overlay" class="modal-overlay hidden"><div class="modal-content"><button class="modal-close-btn-top" title="Close guide">&times;</button><h3>How to Backup on Telegram</h3><div id="telegram-backup-modal-content" class="guide-step"><p><strong>Step 1: Create a Telegram Channel</strong><br>Open Telegram, create a "New Channel". Make sure you set it to "Public" and give it a unique, easy-to-remember username (e.g., "my_upsc_notes_123").</p><p><strong>Step 2: Copy Questions from EXAMYATRI</strong><br>On this results page, click the "⭐ Copy Bookmarked" or "📋 Copy All" button. This copies the text to your clipboard.</p><p><strong>Step 3: Enter Username & Open</strong><br>Type the channel username you created (e.g., "my_upsc_notes_123") into the box above the 🤔 button and click "Open".</p><p><strong>Step 4: Paste and Save</strong><br>This will open your channel in Telegram. Just paste the copied questions into the message box and send. Your notes are now saved!</p></div><div class="modal-actions"><button id="telegram-backup-close-btn" class="btn">Okay, I Understand</button></div></div></div>
+<div id="gemini-instructions-modal-overlay" class="modal-overlay hidden"><div class="modal-content"><h3>Ready for AI Magic? ✨</h3><div id="gemini-instructions-content-wrapper"><div class="guide-step"><strong>1️⃣ When Gemini opens:</strong><p>Just paste the instructions into the message box and hit send.</p></div><div class="guide-step"><strong>2️⃣ Copy the Generated Questions:</strong><p>Once the AI finishes, copy the entire response.</p><ul style="padding-left: 20px; margin-top: 0.5em; font-size: 0.9em;"><li><strong>Method 1:</strong> Tap on 3 Vertical Dots (⋮) at the start of the generated question.</li><li><strong>Method 2:</strong> Tap the Copy Icon (📋) at the end of the generated question.</li></ul></div><div class="guide-step"><strong>3️⃣ Return to Examyatri:</strong><p>Come back to this tab to start the assessment.</p><ul style="padding-left: 20px; margin-top: 0.5em; font-size: 0.9em;"><li><strong>Method 1:</strong> Press your device's 'Back' button twice.</li><li><strong>Method 2:</strong> Manually switch tabs from Gemini back to Examyatri.</li></ul></div></div><div class="modal-actions" style="justify-content: center;"><button id="open-gemini-btn" class="btn btn-full-width fire-animation">Got it and Open Gemini Now ➜</button></div></div></div>
+
+
+<!-- SCRIPTS -->
+<!-- Firebase Script -->
+<script type="module">
+  // Your web app's Firebase configuration
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+  import { getDatabase, ref, set, get, onValue, push, onChildAdded, onChildRemoved, serverTimestamp, runTransaction, remove } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyB1CQwYIgrL5H9h5EyKLaBpBQS8X1MLzpU",
+    authDomain: "examyatri-a6e8f.firebaseapp.com",
+    databaseURL: "https://examyatri-a6e8f-default-rtdb.firebaseio.com",
+    projectId: "examyatri-a6e8f",
+    storageBucket: "examyatri-a6e8f.appspot.com",
+    messagingSenderId: "779946225357",
+    appId: "1:779946225357:web:4c663a567dc4eb66d402cf"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  // Expose to global scope for the main script
+  window.firebase = { db, ref, set, get, onValue, push, onChildAdded, onChildRemoved, serverTimestamp, runTransaction, remove };
+</script>
+
+<!-- External Libraries -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
+<script>pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js`;</script>
+<script src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
+
+<!-- Visitor Counter -->
+<div id="visitor-count" 
+     style="position:fixed; 
+            bottom:0; 
+            left:50%; 
+            transform:translateX(-50%);
+            background: rgba(0,0,0,0.85); 
+            color: #fff; 
+            padding:8px 16px;
+            border-radius:12px; 
+            font-family:Arial,sans-serif; 
+            font-size:14px;
+            z-index:999; 
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            text-shadow: 0 0 4px #00f; 
+            display:flex; 
+            align-items:center; 
+            gap:8px;">
+
+  <span>Visitors:</span>
+  <img src="https://hits.sh/examyatri.live.svg?style=flat&label=" alt="Visitor Count"/>
+  
+</div>
+
+<!-- Main App Logic -->
+<script type="text/babel" data-presets="react,typescript" src="index.tsx" defer></script>
+
+<script type="module" src="/index.tsx"></script>
+</body>
+</html>
